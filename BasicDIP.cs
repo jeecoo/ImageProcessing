@@ -14,6 +14,37 @@ namespace ImageProcessing
 {
     static class BasicDIP
     {
+        public static void CopyImage(ref Bitmap a, ref Bitmap b)
+        {
+            // Create a new bitmap with the same dimensions and pixel format as the source
+            b = new Bitmap(a.Width, a.Height, a.PixelFormat);
+
+            // Define a rectangle covering the entire area of the bitmap
+            var rect = new Rectangle(0, 0, a.Width, a.Height);
+
+            // Lock bits of both source and destination images
+            var aData = a.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, a.PixelFormat);
+            var bData = b.LockBits(rect, System.Drawing.Imaging.ImageLockMode.WriteOnly, b.PixelFormat);
+
+            // Calculate the number of bytes in the image
+            int bytes = Math.Abs(aData.Stride) * a.Height;
+
+            // Create a byte array to hold the pixel data
+            byte[] pixelData = new byte[bytes];
+
+            // Copy data from the source image to the byte array
+            System.Runtime.InteropServices.Marshal.Copy(aData.Scan0, pixelData, 0, bytes);
+
+            // Copy data from the byte array to the destination image
+            System.Runtime.InteropServices.Marshal.Copy(pixelData, 0, bData.Scan0, bytes);
+
+            // Unlock bits in both images
+            a.UnlockBits(aData);
+            b.UnlockBits(bData);
+        }
+
+
+
         public static void Rotate(ref Bitmap a, ref Bitmap b, int value)
         {
             float angleRad = (float)(value * Math.PI / 180);
